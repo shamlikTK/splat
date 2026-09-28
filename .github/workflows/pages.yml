@@ -19,6 +19,7 @@ jobs:
       # The manual is generated, never committed: this is what keeps it from drifting
       # away from the skill it documents.
       - run: npm run build:site
+      - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
         with: { path: site }
   deploy:

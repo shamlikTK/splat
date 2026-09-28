@@ -147,7 +147,7 @@ export function buildManual({ root, out }) {
   return { sections, bytes: html.length };
 }
 
-if (process.argv[1] && process.argv[1].endsWith("build.mjs")) {
+if (process.argv[1] && (process.argv[1].endsWith("build.mjs") || process.argv[1].endsWith("build-manual.mjs"))) {
   const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
   const r = buildManual({ root, out: path.join(root, "site/manual") });
   console.log(`manual: ${r.sections.length} sections, ${(r.bytes / 1024).toFixed(0)} KB`);

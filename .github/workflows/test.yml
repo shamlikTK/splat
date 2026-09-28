@@ -10,8 +10,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
       - name: repository and site tests
-        run: node --test
+        run: npm test
       - name: CLI tests
-        run: cd plugins/splat-site/cli && npm install && npm test
+        run: cd plugins/splat-site/cli && npm ci && npm test
       - name: skill script tests
         run: cd plugins/splat-site/skills/splat-site && node --test
