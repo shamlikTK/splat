@@ -157,8 +157,7 @@ site around.
 **The template route.** The CLI already ships a finished photo-walk page: the capture as a
 fixed world, pins holding photos at the spots they were taken, an album, a route map, an orbit
 viewer. If the ask is "my photos, in the place I took them", fill in the manifest's `spots` and
-build. Every manifest key is documented in `splatsite/docs/manifest.md` — note that is beside
-`cli/`, not inside it.
+build. Every manifest key is documented in `<cli>/docs/manifest.md`.
 
 Each spot needs a position in the walk's own `{t, a, h}` coordinates. Do not estimate them, and
 do not assume frame numbers follow the walk: the extractor drops blurry frames and a phone's
