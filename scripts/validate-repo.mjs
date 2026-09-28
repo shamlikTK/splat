@@ -2,6 +2,7 @@
 // Exports: validateRepo(root) -> { ok, problems }
 import fs from "node:fs";
 import path from "node:path";
+import { execFileSync } from "node:child_process";
 
 const REQUIRED = [
   ".claude-plugin/marketplace.json",
@@ -16,7 +17,38 @@ const REQUIRED = [
 
 // A distribution repo must never carry footage or reconstructions: they are large, they are
 // permanent once pushed, and they are usually somebody's private material.
-const FORBIDDEN = /\.(mp4|mov|avi|ply)$/i;
+// Deliberately NOT forbidden: .sog, .splat, .ksplat. Those are the shipped capture tiers
+// (site/walk/assets/capture.sog, capture-mobile.sog, capture-lite.sog) — the whole point of
+// this repo is to ship those. Do not add them here.
+const FORBIDDEN = /\.(mp4|mov|avi|mkv|webm|m4v|ply)$/i;
+
+const MAX_BYTES = 99 * 1024 * 1024; // GitHub refuses files over 100 MB; fail before a push, not during one.
+
+// List the files this repo would actually ship: the git index when root is a repo (so a
+// gitignored scratch file in scene/ or work/ never trips the checks below), or a plain
+// filesystem walk otherwise (validateRepo is also called against roots built for tests that
+// aren't git repos).
+function listFiles(root) {
+  if (fs.existsSync(path.join(root, ".git"))) {
+    try {
+      const out = execFileSync("git", ["ls-files"], { cwd: root, encoding: "utf8" });
+      return out.split("\n").filter(Boolean);
+    } catch {
+      // fall through to the filesystem walk below
+    }
+  }
+  const files = [];
+  const walk = (dir) => {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (e.name === ".git" || e.name === "node_modules") continue;
+      const full = path.join(dir, e.name);
+      if (e.isDirectory()) walk(full);
+      else files.push(path.relative(root, full));
+    }
+  };
+  walk(root);
+  return files;
+}
 
 export function validateRepo(root) {
   const problems = [];
@@ -42,15 +74,12 @@ export function validateRepo(root) {
     }
   }
 
-  const walk = (dir) => {
-    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
-      if (e.name === ".git" || e.name === "node_modules") continue;
-      const full = path.join(dir, e.name);
-      if (e.isDirectory()) walk(full);
-      else if (FORBIDDEN.test(e.name)) problems.push(`forbidden file in a public repo: ${path.relative(root, full)}`);
-    }
-  };
-  walk(root);
+  for (const rel of listFiles(root)) {
+    const full = path.join(root, rel);
+    if (FORBIDDEN.test(rel)) problems.push(`forbidden file in a public repo: ${rel}`);
+    const { size } = fs.statSync(full);
+    if (size > MAX_BYTES) problems.push(`file exceeds GitHub's 100 MB limit: ${rel} (${(size / (1024 * 1024)).toFixed(1)} MB)`);
+  }
 
   return { ok: problems.length === 0, problems };
 }

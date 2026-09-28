@@ -12,7 +12,7 @@ test("the repository is a valid marketplace with one plugin", () => {
   assert.equal(r.ok, true);
 });
 
-test("no video, capture source or private material ships", () => {
+test("no video or reconstruction source ships", () => {
   const r = validateRepo(ROOT);
   assert.equal(r.problems.filter((p) => /forbidden file/.test(p)).length, 0);
 });
