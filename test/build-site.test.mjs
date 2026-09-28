@@ -41,6 +41,16 @@ test("markdown is escaped, not injected", () => {
 
 test("a missing source document fails loudly", () => {
   const out = fs.mkdtempSync(path.join(os.tmpdir(), "splat-manual-"));
-  assert.throws(() => buildManual({ root: path.join(out, "nothing"), out }), /SKILL\.md/);
+  const root = path.join(out, "nothing");
+  const expectedPath = path.join(root, "plugins/splat-site/skills/splat-site/SKILL.md");
+  let threw;
+  try {
+    buildManual({ root, out });
+  } catch (e) {
+    threw = e;
+  }
+  assert.ok(threw, "expected buildManual to throw");
+  assert.ok(threw.message.includes(expectedPath), `error should name the specific missing path (${expectedPath}), got: ${threw.message}`);
+  assert.deepEqual(fs.readdirSync(out), [], "a failed build must not write a partial page");
   fs.rmSync(out, { recursive: true, force: true });
 });

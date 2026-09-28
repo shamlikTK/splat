@@ -116,7 +116,7 @@ export function buildManual({ root, out }) {
   const parts = [];
   for (const s of SOURCES) {
     const file = path.join(root, s.file);
-    if (!fs.existsSync(file)) throw new Error(`manual source missing: ${s.file} (looked in ${root})`);
+    if (!fs.existsSync(file)) throw new Error(`manual source missing: ${file} (expected ${s.file} under root ${root})`);
     sections.push(s.id);
     parts.push(`<section id="${s.id}"><h1>${esc(s.title)}</h1>\n${render(body(fs.readFileSync(file, "utf8")))}</section>`);
   }
