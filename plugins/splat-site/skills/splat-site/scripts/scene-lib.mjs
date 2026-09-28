@@ -21,13 +21,14 @@ export function resolveCli() {
   let hit = take(process.env.SPLATSITE_CLI);
   if (hit) return hit;
 
-  // The CLI that ships in this repo, found relative to this file rather than to the working
-  // directory: an installed skill runs from wherever the user happens to be. Marketplace
-  // installs clone the whole repo, not just the plugin's own source subtree, so cli/ (a sibling
-  // of plugins/, per the repository layout) is still on disk at this fixed offset.
-  // <repo>/plugins/splat-site/skills/splat-site/scripts/scene-lib.mjs -> <repo>/cli
+  // The CLI that ships inside this plugin, found relative to this file rather than to the
+  // working directory: an installed skill runs from wherever the user happens to be. An
+  // installed plugin's cache holds only its own source subtree (the plugin root, holding both
+  // skills/ and cli/) — never the rest of the repository it was published from — so cli/ has
+  // to live under the plugin root, not beside it.
+  // <plugin>/skills/splat-site/scripts/scene-lib.mjs -> <plugin>/cli
   const here = path.dirname(fileURLToPath(import.meta.url));
-  hit = take(path.resolve(here, "../../../../../cli"));
+  hit = take(path.resolve(here, "../../../cli"));
   if (hit) return hit;
 
   try {
