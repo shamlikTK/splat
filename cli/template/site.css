@@ -1,0 +1,575 @@
+/* ============================================================================
+   mmnj.css: the MMNJ Sports Day build's own styles.
+   Tokens first, then the stage planes, the pins and frames, the copy layer,
+   the chrome (route map), the album, the lightbox, then phone and reduced
+   motion. Nothing here restyles .sc-* engine selectors.
+   ========================================================================== */
+
+:root {
+  --sc-canvas:      #0A0F0C;
+  --sc-surface:     #141C17;
+  --sc-ink:         #F3EEE4;
+  --sc-ink-soft:    #A7B3A6;
+  --sc-accent:      #FF5B3A;
+  --sc-accent-ink:  #1A0D08;
+
+  --sc-font-display: "Archivo", "Arial Black", Impact, sans-serif;
+  --sc-font-text:    "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --sc-font-mono:    "Instrument Sans", ui-monospace, monospace;
+
+  --sc-shadow-color: 150 30% 3%;
+  --sc-r-sm: 4px; --sc-r-md: 8px; --sc-r-lg: 14px;
+
+  /* light-on-dark compensation: a touch more leading and tracking on body */
+  --sc-leading-body: 1.64;
+  --sc-track-normal: 0.004em;
+
+  /* page-local */
+  --forest-edge: #1E2A22;
+  --frame-h: 34vh;
+  --z-stage: 1; --z-copy: 20; --z-album: 30; --z-chrome: 60;
+}
+
+html { background: var(--sc-canvas); }
+body { overflow-x: clip; }
+
+.display { font-family: var(--sc-font-display); font-variation-settings: "wdth" 118; font-weight: 800; }
+
+/* Skip link: visible only on focus. */
+.skip {
+  position: fixed; left: var(--sc-4); top: var(--sc-4); z-index: 90;
+  padding: var(--sc-2) var(--sc-4);
+  background: var(--sc-accent); color: var(--sc-accent-ink);
+  font-family: var(--sc-font-display); font-weight: 700; text-decoration: none;
+  transform: translateY(-160%);
+  transition: transform var(--sc-d-fast) var(--sc-ease-out);
+}
+.skip:focus-visible { transform: none; }
+
+/* --------------------------------------------------------------- stage --
+   One fixed stage. Planes back to front: poster (until the first splat frame),
+   the live capture, the pins and frames. Without JS it is a relative block a
+   viewport tall, the poster showing, and the album follows it in flow.      */
+.stage {
+  position: relative; height: 100svh; z-index: var(--z-stage);
+  background: var(--sc-canvas); overflow: clip; contain: strict;
+}
+.js .stage { position: fixed; inset: 0; height: auto; touch-action: pan-y pinch-zoom; }
+/* Free look at the stops: the hand grabs the world. */
+.stage.can-look .stage__pins { cursor: grab; }
+.stage.is-looking .stage__pins { cursor: grabbing; }
+.stage.is-looking { user-select: none; -webkit-user-select: none; }
+.stage__poster { pointer-events: none; }
+.stage__poster, .stage__splat {
+  position: absolute; inset: 0; width: 100%; height: 100%; max-width: none;
+}
+.stage__poster { object-fit: cover; object-position: 50% 55%; transition: opacity 600ms var(--sc-ease-out); }
+.stage.is-live .stage__poster { opacity: 0; }
+.stage__splat { display: none; }
+.js .stage__splat { display: block; }
+.stage.no-gl .stage__splat { display: none; }
+.stage__load {
+  position: absolute; left: var(--sc-gutter); bottom: calc(var(--sc-5) + env(safe-area-inset-bottom));
+  margin: 0; font-size: var(--sc-t-xs); letter-spacing: var(--sc-track-wide); text-transform: uppercase;
+  color: var(--sc-ink-soft); pointer-events: none;
+}
+.stage__load:empty { display: none; }
+.stage__hint {
+  position: absolute; left: var(--sc-gutter); bottom: calc(var(--sc-5) + env(safe-area-inset-bottom));
+  margin: 0; padding: var(--sc-1) var(--sc-3);
+  background: var(--sc-canvas); color: var(--sc-ink);
+  font-size: var(--sc-t-xs); font-weight: 600; letter-spacing: 0.02em;
+  border-radius: var(--sc-r-sm); box-shadow: var(--sc-e1);
+  opacity: 0; transform: translateY(6px);
+  transition: opacity var(--sc-d-base) var(--sc-ease-out), transform var(--sc-d-base) var(--sc-ease-out);
+  pointer-events: none;
+}
+.stage__hint.is-on { opacity: 1; transform: none; }
+.stage__hint[hidden] { display: none; }
+
+/* ---------------------------------------------------------------- pins --
+   Each photo is a real button anchored to a position in the capture. walk.js
+   writes its translate and scale every frame; nothing else moves it.        */
+.stage__pins { position: absolute; inset: 0; }
+.pin {
+  position: absolute; left: 0; top: 0;
+  width: 44px; height: 44px; margin: -22px 0 0 -22px; padding: 0;
+  background: none; border: 0; border-radius: 50%; cursor: pointer;
+  color: var(--sc-ink);
+  --s: 1;
+  will-change: transform, opacity;
+  transition: opacity var(--sc-d-base) var(--sc-ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+.pin.is-behind { opacity: 0.12; pointer-events: none; }
+.pin__art { position: absolute; inset: 0; transform: scale(var(--s)); transform-origin: 50% 50%; }
+.pin[hidden] { display: none; }
+.pin__dot {
+  position: absolute; left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px;
+  border-radius: 50%; background: var(--sc-accent);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  transition: transform var(--sc-d-fast) var(--sc-ease-out);
+}
+.pin__ring {
+  position: absolute; left: 50%; top: 50%; width: 26px; height: 26px; margin: -13px 0 0 -13px;
+  border-radius: 50%; border: 1.5px solid var(--sc-accent);
+  opacity: 0.85;
+  transition: transform var(--sc-d-base) var(--sc-ease-out), opacity var(--sc-d-base) var(--sc-ease-out);
+}
+.pin__halo {
+  position: absolute; left: 50%; top: 50%; width: 26px; height: 26px; margin: -13px 0 0 -13px;
+  border-radius: 50%; border: 1.5px solid var(--sc-accent); opacity: 0;
+}
+.pin__label {
+  position: absolute; left: 50%; top: calc(100% - 6px);
+  translate: -50% 0;
+  padding: var(--sc-1) var(--sc-3);
+  background: var(--sc-canvas);
+  color: var(--sc-ink);
+  font-family: var(--sc-font-text); font-size: var(--sc-t-xs); font-weight: 600;
+  letter-spacing: 0.02em; white-space: nowrap;
+  border-radius: var(--sc-r-sm); box-shadow: var(--sc-e1);
+  opacity: 0; transform: translateY(-4px);
+  transition: opacity var(--sc-d-fast) var(--sc-ease-out), transform var(--sc-d-fast) var(--sc-ease-out);
+  pointer-events: none;
+}
+.pin:hover .pin__label, .pin:focus-visible .pin__label, .pin.is-near .pin__label { opacity: 1; transform: none; }
+.pin:hover .pin__ring, .pin:focus-visible .pin__ring { transform: scale(1.35); opacity: 1; }
+.pin:focus-visible { outline: none; }
+.pin:focus-visible .pin__ring { border-width: 2.5px; }
+.pin.is-visited .pin__dot { background: var(--sc-ink); }
+.pin.is-open .pin__ring { transform: scale(1.6); opacity: 0.35; }
+.pin.is-open .pin__label { opacity: 0; }
+/* All pins light together on the rise: the halo pulses out once. */
+.stage.is-lit .pin__halo { animation: halo 1600ms var(--sc-ease-out) both; }
+.stage.is-lit .pin__dot { transform: scale(1.35); }
+@keyframes halo { from { transform: scale(1); opacity: 0.9; } to { transform: scale(3.2); opacity: 0; } }
+
+/* The frame: the photo blooming out of its pin. --bloom (0 to 1) is written
+   by walk.js; everything visual derives from it here.                       */
+.frame {
+  position: absolute; left: 0; top: 0; margin: 0;
+  --bloom: 0;
+  transform-origin: 50% 100%;
+  opacity: var(--bloom);
+  visibility: hidden;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+.frame.is-on { visibility: visible; }
+.frame.is-on .frame__open { pointer-events: auto; }
+.frame__inner {
+  position: absolute; left: 0; bottom: 28px;
+  translate: -50% 0;
+  transform: scale(calc(0.72 + 0.28 * var(--bloom)));
+  transform-origin: 50% 100%;
+  display: flex; flex-direction: column; align-items: flex-start; gap: var(--sc-2);
+}
+.frame__tether {
+  position: absolute; left: -0.75px; bottom: 0; width: 1.5px; height: 28px;
+  background: linear-gradient(to top, var(--sc-accent), color-mix(in oklab, var(--sc-accent) 30%, transparent));
+  transform-origin: 50% 100%; transform: scaleY(var(--bloom));
+}
+.frame__open {
+  display: block; padding: 0; border: 0; background: none; cursor: zoom-in;
+  border-radius: var(--sc-r-md);
+  box-shadow: 0 18px 40px -10px rgba(0, 0, 0, 0.7), var(--sc-e2);
+  outline-offset: 4px;
+}
+.frame__open:focus-visible { outline: 2.5px solid var(--sc-accent); }
+.frame__img {
+  display: block; height: var(--frame-h); width: auto; max-width: min(72vw, 44rem);
+  border-radius: var(--sc-r-md); object-fit: cover;
+  border: 3px solid var(--sc-ink);
+}
+/* A spot with several photos: the first in front, two more fanned behind, and the count. */
+.frame__stack { position: relative; display: block; isolation: isolate; }
+.frame--stack .frame__img--1, .frame--stack .frame__img--2 {
+  position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1;
+  transform-origin: 50% 100%;
+}
+.frame--stack .frame__img--1 { transform: rotate(-5deg) translate(-4%, 1%); filter: brightness(0.82); }
+.frame--stack .frame__img--2 { transform: rotate(6deg) translate(5%, 0.5%); filter: brightness(0.66); }
+.frame__count {
+  position: absolute; right: 10px; top: 10px; z-index: 1;
+  padding: var(--sc-1) var(--sc-2);
+  background: var(--sc-canvas); color: var(--sc-ink);
+  font-family: var(--sc-font-display); font-variation-settings: "wdth" 112; font-weight: 800;
+  font-size: var(--sc-t-xs); letter-spacing: 0.02em;
+  border-radius: var(--sc-r-sm); box-shadow: var(--sc-e1);
+}
+.frame__cap {
+  /* Positioned so it paints after the (positioned) stack: a fanned back photo must never cross the caption. */
+  position: relative; z-index: 1;
+  margin: 0; padding: var(--sc-1) var(--sc-3);
+  background: var(--sc-canvas);
+  border-radius: var(--sc-r-sm);
+  font-size: var(--sc-t-sm); line-height: 1.4; color: var(--sc-ink);
+  white-space: nowrap; max-width: min(72vw, 44rem); overflow: hidden; text-overflow: ellipsis;
+}
+.frame__cap strong { font-family: var(--sc-font-display); font-variation-settings: "wdth" 112; font-weight: 800; letter-spacing: 0.01em; }
+.frame__cap span { color: var(--sc-ink-soft); }
+.frame__cap span::before { content: "\00b7\00a0"; color: var(--sc-accent); }
+
+/* ---------------------------------------------------------------- copy --
+   Type over the world. Each block's opacity and 4vh of travel come from
+   --w (0 to 1) and --ty, written by walk.js against the track.              */
+.copy { position: absolute; inset: 0; z-index: var(--z-copy); pointer-events: none; }
+.js .copy { position: fixed; }
+.copy > * { --w: 0; --ty: 0px; opacity: var(--w); transform: translate3d(0, var(--ty), 0); }
+
+.hero {
+  position: absolute; left: var(--sc-gutter); right: var(--sc-gutter);
+  bottom: calc(var(--sc-9) + env(safe-area-inset-bottom));
+  --w: 1;
+  max-width: 60rem;
+}
+.hero__title, .hero__lede { width: fit-content; }
+.hero__title {
+  margin: 0;
+  font-family: var(--sc-font-display); font-variation-settings: "wdth" 122; font-weight: 900;
+  font-size: clamp(2.6rem, 0.8rem + 6.4vw, 6.6rem);
+  line-height: 0.9; letter-spacing: -0.028em; text-transform: uppercase;
+  color: var(--sc-ink);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35), 0 22px 60px rgba(0, 0, 0, 0.55);
+  text-wrap: balance;
+}
+.hero__title-b { display: block; color: var(--sc-accent); }
+.hero__lede {
+  margin: var(--sc-5) 0 0; max-width: 34ch;
+  font-size: var(--sc-t-lg); line-height: 1.45; color: var(--sc-ink);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 8px 30px rgba(0, 0, 0, 0.5);
+  text-wrap: pretty;
+}
+/* A corner of density under the title only, never the whole frame. A sibling
+   of the copy it protects, so hiding the copy leaves it measurable. */
+.hero-scrim {
+  position: absolute; left: -12vw; bottom: -22vh; width: 96vw; height: 92vh;
+  --w: 1;
+  background: radial-gradient(64% 46% at 44% 52%, rgba(10, 15, 12, 0.95), rgba(10, 15, 12, 0.9) 50%, rgba(10, 15, 12, 0.6) 70%, transparent 90%);
+}
+
+.line {
+  position: absolute; margin: 0;
+  font-family: var(--sc-font-display); font-variation-settings: "wdth" 108; font-weight: 700;
+  font-size: var(--sc-t-xl); line-height: 1.12; letter-spacing: -0.012em;
+  color: var(--sc-ink); text-wrap: balance;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7), 0 10px 34px rgba(0, 0, 0, 0.6);
+}
+.line--rise { right: var(--sc-gutter); top: 18vh; max-width: 20ch; width: fit-content; text-align: right; }
+.rise-scrim {
+  position: absolute; right: -14vw; top: -2vh; width: 68vw; height: 52vh;
+  background: radial-gradient(52% 56% at 50% 50%, rgba(10, 15, 12, 0.95), rgba(10, 15, 12, 0.9) 50%, rgba(10, 15, 12, 0.6) 70%, transparent 90%);
+}
+
+/* -------------------------------------------------------------- chrome -- */
+.chrome { position: fixed; inset: 0; z-index: var(--z-chrome); pointer-events: none; }
+.chrome > * { pointer-events: auto; }
+.chrome__mark {
+  position: absolute; left: var(--sc-gutter); top: var(--sc-5);
+  font-family: var(--sc-font-display); font-variation-settings: "wdth" 118; font-weight: 800;
+  font-size: var(--sc-t-sm); letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--sc-ink); text-decoration: none;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  --w: 0; opacity: var(--w);
+}
+.chrome__mark:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 4px; opacity: 1; }
+.chrome__actions { position: absolute; right: var(--sc-gutter); top: var(--sc-5); display: flex; gap: var(--sc-5); align-items: baseline; }
+.chrome__cta {
+  padding: var(--sc-2) 0;
+  font-family: var(--sc-font-text); font-weight: 600; font-size: var(--sc-t-sm);
+  color: var(--sc-ink); text-decoration: underline; text-decoration-color: var(--sc-accent);
+  text-decoration-thickness: 2px; text-underline-offset: 0.3em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  transition: text-decoration-color var(--sc-d-fast) var(--sc-ease-out);
+}
+.chrome__cta:hover { text-decoration-color: var(--sc-ink); }
+.chrome__cta--viewer { color: var(--sc-ink-soft); text-decoration-color: color-mix(in oklab, var(--sc-accent) 60%, transparent); }
+.chrome__cta--viewer[hidden] { display: none; }
+.chrome__cta:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 4px; }
+
+/* The route map: a plan of the ground drawn from the capture itself. */
+.map {
+  position: absolute; right: var(--sc-gutter); bottom: calc(var(--sc-5) + env(safe-area-inset-bottom));
+  width: 220px;
+  padding: var(--sc-3) var(--sc-3) var(--sc-2);
+  background: color-mix(in oklab, var(--sc-canvas) 78%, transparent);
+  border-radius: var(--sc-r-lg);
+  box-shadow: var(--sc-e2), var(--sc-edge);
+  backdrop-filter: blur(6px);
+}
+.map[hidden], .map__pins[hidden] { display: none; }
+html:not(.js) .map { display: none; }
+/* The route is complete once the album is up; the map steps aside. */
+.map { transition: opacity var(--sc-d-slow) var(--sc-ease-out); }
+.map.is-away { opacity: 0; pointer-events: none; }
+.map__plan { display: block; width: 100%; height: auto; border-radius: var(--sc-r-md); }
+.map__pins { position: absolute; left: var(--sc-3); right: var(--sc-3); top: var(--sc-3); aspect-ratio: 440 / 520; }
+.map__pin {
+  position: absolute; left: 0; top: 0; width: 28px; height: 28px; margin: -14px 0 0 -14px;
+  padding: 0; border: 0; background: none; cursor: pointer; border-radius: 50%;
+}
+.map__pin::before {
+  content: ""; position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px;
+  border-radius: 50%; background: var(--sc-canvas); border: 2px solid var(--sc-accent);
+  transition: transform var(--sc-d-fast) var(--sc-ease-out), background-color var(--sc-d-fast) var(--sc-ease-out);
+}
+.map__pin.is-visited::before { background: var(--sc-accent); }
+.map__pin.is-current::before { transform: scale(1.4); background: var(--sc-ink); border-color: var(--sc-ink); }
+.map__pin:hover::before { transform: scale(1.4); }
+.map__pin:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: -2px; }
+.map__where {
+  margin: var(--sc-2) 0 0; padding: 0 var(--sc-1);
+  font-size: var(--sc-t-xs); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--sc-ink-soft);
+}
+.map__where::before { content: ""; display: inline-block; width: 6px; height: 6px; margin: 0 var(--sc-2) 1px 0; border-radius: 50%; background: var(--sc-accent); }
+
+/* --------------------------------------------------------------- album --
+   In flow without JS: a readable album under the poster. With JS: a fixed
+   panel that arrives on the last leg and holds, scrolling inside itself
+   when there are more photos than fit.                                     */
+.album {
+  position: relative; z-index: var(--z-album);
+  padding: var(--sc-section) var(--sc-gutter);
+  background: var(--sc-canvas); color: var(--sc-ink);
+}
+.js .album {
+  position: fixed; inset: 0;
+  display: grid; align-content: safe center;
+  padding: clamp(4.5rem, 12vh, 8rem) var(--sc-gutter) clamp(6rem, 16vh, 9rem);
+  background: transparent;
+  overflow-y: auto;
+  --w: 0; opacity: var(--w); visibility: hidden; pointer-events: none;
+}
+.js .album.is-on { visibility: visible; }
+.js .album.is-hot { pointer-events: auto; }
+.album-veil { display: none; }
+.js .album-veil {
+  display: block; position: fixed; inset: 0; z-index: calc(var(--z-album) - 1);
+  --w: 0; opacity: var(--w); pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 60%, rgba(10, 15, 12, 0.9), rgba(10, 15, 12, 0.72) 60%, rgba(10, 15, 12, 0.5));
+}
+.album__inner { width: 100%; max-width: var(--sc-maxw); margin: 0 auto; }
+.album__title {
+  margin: 0 0 var(--sc-6);
+  font-family: var(--sc-font-display); font-variation-settings: "wdth" 120; font-weight: 900;
+  font-size: var(--sc-t-3xl); line-height: 0.94; letter-spacing: -0.025em; text-transform: uppercase;
+}
+.album__grid {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: var(--sc-5) var(--sc-4);
+}
+/* Spots. A single-photo spot places its one photo straight into the album grid;
+   a spot with several photos takes a full row: its name, the count, its own grid. */
+.spot--single, .spot--single .spot__photos { display: contents; }
+.spot:not(.spot--single) { grid-column: 1 / -1; margin-top: var(--sc-5); }
+.spot:not(.spot--single):first-child { margin-top: 0; }
+.spot__name {
+  margin: 0 0 var(--sc-4); display: flex; align-items: baseline; gap: var(--sc-3);
+  font-family: var(--sc-font-display); font-variation-settings: "wdth" 114; font-weight: 800;
+  font-size: var(--sc-t-xl); letter-spacing: -0.01em; line-height: 1.1;
+}
+.spot__open { color: var(--sc-ink); text-decoration: none; }
+.spot__open:hover { text-decoration: underline; text-decoration-color: var(--sc-accent); text-decoration-thickness: 2px; text-underline-offset: 0.18em; }
+.spot__open:focus-visible { outline: 2.5px solid var(--sc-accent); outline-offset: 4px; border-radius: 2px; }
+.spot__count { font-family: var(--sc-font-text); font-weight: 600; font-size: var(--sc-t-sm); color: var(--sc-ink-soft); }
+.spot:not(.spot--single) .spot__photos {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: var(--sc-3);
+}
+.spot:not(.spot--single) .shot figcaption { font-size: var(--sc-t-xs); margin-top: var(--sc-2); }
+.spot:not(.spot--single) .shot__title { font-size: var(--sc-t-sm); }
+.album__more { margin: var(--sc-5) 0 0; font-size: var(--sc-t-sm); color: var(--sc-ink-soft); }
+.album__more a { color: var(--sc-ink); text-decoration-color: var(--sc-accent); text-decoration-thickness: 2px; text-underline-offset: 0.3em; }
+.album__more a:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 4px; }
+.shot figure { margin: 0; }
+.shot__link { display: block; border-radius: var(--sc-r-md); outline-offset: 4px; }
+.shot__link:focus-visible { outline: 2.5px solid var(--sc-accent); }
+.shot img {
+  display: block; width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover;
+  border-radius: var(--sc-r-md); box-shadow: var(--sc-e2);
+  transition: transform var(--sc-d-fast) var(--sc-ease-out);
+}
+.shot__link:hover img { transform: translateY(-2px); }
+.shot figcaption { margin-top: var(--sc-3); font-size: var(--sc-t-sm); line-height: 1.4; }
+.shot__title { display: block; font-family: var(--sc-font-display); font-variation-settings: "wdth" 112; font-weight: 800; font-size: var(--sc-t-base); }
+.shot__spot { color: var(--sc-ink-soft); }
+.album__colophon {
+  margin: var(--sc-8) 0 0; max-width: 52ch;
+  font-size: var(--sc-t-sm); line-height: var(--sc-leading-body); color: var(--sc-ink-soft);
+  text-wrap: pretty;
+}
+.album__colophon::before { content: ""; display: block; width: 3rem; height: 2px; margin-bottom: var(--sc-4); background: var(--sc-accent); }
+/* Staggered arrival driven by the class walk.js sets on the last leg. */
+.js .album .shot, .js .album__title, .js .album__colophon {
+  opacity: 0; transform: translateY(14px);
+  transition: opacity 620ms var(--sc-ease-out), transform 620ms var(--sc-ease-out);
+}
+.js .album.is-in .shot, .js .album.is-in .album__title, .js .album.is-in .album__colophon { opacity: 1; transform: none; }
+.js .album.is-in .shot:nth-child(2) { transition-delay: 70ms; }
+.js .album.is-in .shot:nth-child(3) { transition-delay: 140ms; }
+.js .album.is-in .shot:nth-child(4) { transition-delay: 210ms; }
+.js .album.is-in .shot:nth-child(5) { transition-delay: 280ms; }
+.js .album.is-in .shot:nth-child(n+6) { transition-delay: 340ms; }
+.js .album.is-in .album__colophon { transition-delay: 380ms; }
+
+/* --------------------------------------------------------------- track -- */
+.track { height: 0; }
+
+/* ------------------------------------------------------------ lightbox -- */
+.light {
+  position: fixed; inset: 0; width: 100%; max-width: none; height: 100%; max-height: none;
+  margin: 0; padding: 0; border: 0; background: transparent; color: var(--sc-ink);
+}
+.light::backdrop { background: rgba(6, 9, 7, 0.92); }
+.light[open] { display: grid; place-items: center; }
+.light__fig { margin: 0; display: grid; justify-items: center; gap: var(--sc-3); padding: var(--sc-6) var(--sc-9); }
+.light__img { display: block; max-width: min(92vw, 1600px); max-height: 82svh; width: auto; height: auto; border-radius: var(--sc-r-md); box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.9); }
+.light__cap { font-size: var(--sc-t-base); line-height: 1.4; text-align: center; }
+.light__cap strong { font-family: var(--sc-font-display); font-variation-settings: "wdth" 112; font-weight: 800; }
+.light__cap span { color: var(--sc-ink-soft); }
+.light__cap span::before { content: "\00b7\00a0"; color: var(--sc-accent); }
+.light__count { color: var(--sc-ink-soft); }
+.light__count:not(:empty)::before { content: "\00b7\00a0"; color: var(--sc-accent); }
+.light__fig[hidden], .light__group[hidden], .light__back[hidden], .light__btn[hidden], .light__download[hidden] { display: none; }
+.light__group {
+  width: min(94vw, 72rem); max-height: 88svh; overflow-y: auto;
+  padding: var(--sc-8) var(--sc-6) var(--sc-6);
+}
+.light__group-title {
+  margin: 0 0 var(--sc-5); display: flex; align-items: baseline; gap: var(--sc-3); flex-wrap: wrap;
+  font-family: var(--sc-font-display); font-variation-settings: "wdth" 118; font-weight: 900;
+  font-size: var(--sc-t-2xl); letter-spacing: -0.02em; line-height: 1;
+}
+.light__group-count { font-family: var(--sc-font-text); font-weight: 600; font-size: var(--sc-t-base); color: var(--sc-ink-soft); letter-spacing: 0; }
+.light__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: var(--sc-3); }
+.light__thumb {
+  display: block; padding: 0; border: 0; background: none; cursor: zoom-in;
+  border-radius: var(--sc-r-md); outline-offset: 3px;
+  transition: transform var(--sc-d-fast) var(--sc-ease-out);
+}
+.light__thumb img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; border-radius: var(--sc-r-md); box-shadow: var(--sc-e2); }
+.light__thumb:hover { transform: translateY(-2px); }
+.light__thumb:focus-visible { outline: 2.5px solid var(--sc-accent); }
+.light__back {
+  position: absolute; left: var(--sc-5); top: calc(var(--sc-5) + 44px);
+  padding: var(--sc-1) 0; border: 0; background: none; cursor: pointer;
+  font-family: var(--sc-font-text); font-size: var(--sc-t-sm); font-weight: 600; color: var(--sc-ink);
+  text-decoration: underline; text-decoration-color: var(--sc-accent); text-decoration-thickness: 2px; text-underline-offset: 0.3em;
+}
+.light__back:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 4px; }
+.light__btn {
+  position: absolute; width: 48px; height: 48px; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
+  background: color-mix(in oklab, var(--sc-surface) 85%, transparent); color: var(--sc-ink);
+  box-shadow: var(--sc-e1), var(--sc-edge);
+  transition: background-color var(--sc-d-fast) var(--sc-ease-out), transform var(--sc-d-fast) var(--sc-ease-out);
+}
+.light__btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.light__btn:hover { background: var(--sc-surface); }
+.light__btn:active { transform: scale(0.96); }
+.light__btn:focus-visible { outline: 2.5px solid var(--sc-accent); outline-offset: 3px; }
+.light__close {
+  right: var(--sc-5); top: var(--sc-5);
+  width: auto; padding: 0 var(--sc-3) 0 var(--sc-4); border-radius: var(--sc-r-pill);
+  display: inline-flex; align-items: center; gap: var(--sc-2);
+  font-family: var(--sc-font-text); font-size: var(--sc-t-sm); font-weight: 600; color: var(--sc-ink);
+}
+.light__prev { left: var(--sc-4); top: 50%; margin-top: -24px; }
+.light__next { right: var(--sc-4); top: 50%; margin-top: -24px; }
+.light__download {
+  position: absolute; left: var(--sc-5); top: calc(var(--sc-5) + 10px);
+  font-size: var(--sc-t-sm); font-weight: 600; color: var(--sc-ink);
+  text-decoration-color: var(--sc-accent); text-decoration-thickness: 2px; text-underline-offset: 0.3em;
+}
+.light__download:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 4px; }
+
+/* ------------------------------------------------------------- viewer --
+   The full capture, full screen, with an orbit camera.                     */
+.viewer {
+  position: fixed; inset: 0; width: 100%; max-width: none; height: 100%; max-height: none;
+  margin: 0; padding: 0; border: 0; background: var(--sc-canvas); color: var(--sc-ink);
+}
+.viewer::backdrop { background: rgba(6, 9, 7, 0.96); }
+.viewer__canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
+.viewer.is-dragging .viewer__canvas { cursor: grabbing; }
+.viewer__bar {
+  position: absolute; left: var(--sc-gutter); right: var(--sc-gutter); top: var(--sc-5);
+  display: flex; align-items: center; gap: var(--sc-4); flex-wrap: wrap;
+  pointer-events: none;
+}
+.viewer__bar > * { pointer-events: auto; }
+.viewer__title {
+  margin: 0 auto 0 0; display: flex; align-items: baseline; gap: var(--sc-3);
+  font-family: var(--sc-font-display); font-variation-settings: "wdth" 118; font-weight: 800;
+  font-size: var(--sc-t-lg); letter-spacing: -0.01em; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+.viewer__count { font-family: var(--sc-font-text); font-weight: 600; font-size: var(--sc-t-sm); color: var(--sc-ink-soft); font-variant-numeric: tabular-nums; }
+.viewer__hint { margin: 0; font-size: var(--sc-t-sm); color: var(--sc-ink-soft); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); }
+.viewer__btn {
+  min-height: 40px; padding: 0 var(--sc-4); border: 0; border-radius: var(--sc-r-pill); cursor: pointer;
+  background: color-mix(in oklab, var(--sc-surface) 85%, transparent); color: var(--sc-ink);
+  font-family: var(--sc-font-text); font-size: var(--sc-t-sm); font-weight: 600;
+  box-shadow: var(--sc-e1), var(--sc-edge);
+  display: inline-flex; align-items: center; gap: var(--sc-2);
+  transition: background-color var(--sc-d-fast) var(--sc-ease-out), transform var(--sc-d-fast) var(--sc-ease-out);
+}
+.viewer__btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.viewer__btn:hover { background: var(--sc-surface); }
+.viewer__btn:active { transform: scale(0.97); }
+.viewer__btn:focus-visible { outline: 2.5px solid var(--sc-accent); outline-offset: 3px; }
+.viewer__status {
+  position: absolute; left: var(--sc-gutter); bottom: calc(var(--sc-5) + env(safe-area-inset-bottom)); margin: 0;
+  padding: var(--sc-1) var(--sc-3); background: var(--sc-canvas); border-radius: var(--sc-r-sm);
+  font-size: var(--sc-t-xs); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--sc-ink-soft);
+}
+.viewer__status:empty { display: none; }
+@media (max-width: 860px) {
+  .chrome__actions { gap: var(--sc-3); }
+  .viewer__hint { display: none; }
+  .viewer__bar { gap: var(--sc-2); }
+}
+/* Without JavaScript the viewer link opens the capture file itself; without WebGL2 it is hidden by viewer.js. */
+
+/* -------------------------------------------------------------- no-GL --
+   Without WebGL2 the poster stays and the walk becomes the album.          */
+.stage.no-gl .stage__poster { opacity: 1; }
+.stage.no-gl .stage__pins { display: none; }
+
+/* ------------------------------------------------------------- phones -- */
+@media (max-width: 860px) {
+  :root { --frame-h: 30vh; }
+  /* The route map owns the bottom-right on phones; the hero block sits above it. */
+  .hero { bottom: calc(var(--sc-5) + 214px + env(safe-area-inset-bottom)); right: var(--sc-gutter); }
+  .hero__title { font-size: clamp(2.6rem, 1rem + 13vw, 4.6rem); }
+  .hero-scrim { left: -30vw; bottom: calc(var(--sc-5) + 214px - 34vh + env(safe-area-inset-bottom)); width: 160vw; height: 100vh; background: radial-gradient(64% 46% at 44% 56%, rgba(10, 15, 12, 0.95), rgba(10, 15, 12, 0.9) 50%, rgba(10, 15, 12, 0.6) 70%, transparent 90%); }
+  .hero__lede { font-size: var(--sc-t-base); max-width: 28ch; margin-top: var(--sc-4); }
+  .line--rise { top: auto; bottom: calc(var(--sc-8) + 56px + env(safe-area-inset-bottom)); left: var(--sc-gutter); right: calc(var(--sc-gutter) + 140px); max-width: none; text-align: left; font-size: var(--sc-t-lg); }
+  .rise-scrim { right: -20vw; top: auto; bottom: -10vh; width: 120vw; height: 70vh; background: radial-gradient(60% 55% at 35% 55%, rgba(10, 15, 12, 0.95), rgba(10, 15, 12, 0.9) 50%, rgba(10, 15, 12, 0.6) 70%, transparent 90%); }
+  .map { width: 124px; padding: var(--sc-2); }
+  .map__pins { left: var(--sc-2); right: var(--sc-2); top: var(--sc-2); }
+  .map__where { font-size: 0.68rem; }
+  .frame__img { max-width: 78vw; }
+  .frame__cap { max-width: 78vw; font-size: var(--sc-t-xs); }
+  .js .album { padding: clamp(4rem, 10vh, 6rem) var(--sc-gutter) clamp(7rem, 18vh, 10rem); align-content: start; }
+  .album__grid { grid-template-columns: repeat(2, 1fr); gap: var(--sc-4) var(--sc-3); }
+  .album__title { font-size: var(--sc-t-2xl); }
+  .light__fig { padding: var(--sc-6) var(--sc-4) var(--sc-8); }
+  .light__img { max-width: 94vw; max-height: 74svh; }
+  .light__prev { top: auto; bottom: var(--sc-5); margin: 0; left: var(--sc-5); }
+  .light__next { top: auto; bottom: var(--sc-5); margin: 0; right: var(--sc-5); }
+  .light__download { left: 50%; bottom: calc(var(--sc-5) + 12px); top: auto; translate: -50% 0; }
+  .light__back { left: var(--sc-5); top: var(--sc-5); }
+  .light__group { padding: var(--sc-8) var(--sc-4) var(--sc-6); max-height: 100svh; }
+  .light__grid { grid-template-columns: repeat(3, 1fr); gap: var(--sc-2); }
+  .spot:not(.spot--single) .spot__photos { grid-template-columns: repeat(3, 1fr); gap: var(--sc-2); }
+  .spot__name { font-size: var(--sc-t-lg); }
+}
+
+/* ------------------------------------------------------ reduced motion -- */
+@media (prefers-reduced-motion: reduce) {
+  .pin__dot, .pin__ring, .pin__label, .frame__inner, .shot img, .light__btn, .light__thumb, .stage__hint { transition: none; }
+  .stage.is-lit .pin__halo { animation: none; }
+  .frame__inner { transform: none; }
+  .js .album .shot, .js .album__title, .js .album__colophon { transition: opacity 300ms linear; transform: none; }
+}

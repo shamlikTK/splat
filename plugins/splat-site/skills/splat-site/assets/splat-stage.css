@@ -1,0 +1,61 @@
+/* splat-stage.css — the fixed splat stage, its poster and its pins.
+   Theme with the scroll-craft tokens; nothing here sets a brand colour except
+   through --sc-canvas, so a page re-themes by overriding tokens as usual. */
+
+.ss-stage {
+  position: fixed;
+  inset: 0;
+  z-index: var(--sc-z-stage, 0);
+  overflow: hidden;
+  background: var(--sc-canvas, #0a0f0c);
+}
+
+.ss-stage .ss-canvas,
+.ss-stage .ss-poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.ss-stage .ss-poster {
+  object-fit: cover;
+  /* The poster is what a visitor sees until the capture paints, and the whole
+     picture under reduced motion or without WebGL, so it fades rather than
+     disappears and it is never removed from the DOM. */
+  opacity: 1;
+  transition: opacity 700ms var(--sc-ease-out, cubic-bezier(0.2, 0.7, 0.2, 1));
+}
+
+.ss-stage.is-live .ss-poster { opacity: 0; }
+.ss-stage .ss-canvas { opacity: 0; transition: opacity 700ms var(--sc-ease-out, cubic-bezier(0.2, 0.7, 0.2, 1)); }
+.ss-stage.is-live .ss-canvas { opacity: 1; }
+
+/* Pins are positioned in viewport pixels by splat-stage.js projecting a world
+   point every frame; they sit above the stage and below the copy layer. */
+.ss-pin {
+  position: fixed;
+  left: 0;
+  top: 0;
+  transform: translate(var(--ss-x, -100px), var(--ss-y, -100px)) translate(-50%, -50%);
+  z-index: calc(var(--sc-z-stage, 0) + 1);
+  margin: 0;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  color: var(--sc-ink, #f3eee4);
+  background: none;
+  will-change: transform;
+}
+
+.ss-pin[hidden] { display: none !important; }
+
+/* Reduced motion and no-WebGL: the page keeps the poster and drops the pins,
+   because without a camera there is nothing to anchor them to. */
+.ss-poster-only .ss-pin { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ss-stage .ss-poster,
+  .ss-stage .ss-canvas { transition: none; }
+}

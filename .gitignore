@@ -1,0 +1,5 @@
+node_modules/
+site/walk/assets/*.ply
+scene/
+work/
+.DS_Store

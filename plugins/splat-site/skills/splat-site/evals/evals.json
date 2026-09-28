@@ -1,0 +1,33 @@
+{
+ "skill_name": "splat-site",
+ "note": "No without-skill baseline is run: the pipeline this skill drives (the splatsite CLI, the scene manifest format, the splat stage device) is not discoverable by an agent that has not read the skill, so a baseline run measures nothing but that absence.",
+ "evals": [
+  {
+   "id": 1,
+   "name": "bespoke-scroll-page-from-scene",
+   "prompt": "I've got a 3D capture of a small street food stall that I filmed on my phone — the converted scene folder is at <scene>. Build me an interactive scrolling website around it. It's for a food truck brand called Ember & Ash; visitors should end up wanting to come find the truck. Use your judgment on the creative direction, I want to get out of your way.",
+   "expected_output": "A brief marked as authored, a built site whose fixed world is the capture, acts that fly the camera plus at least three non-splat device families, and a passing splatsite check.",
+   "assertions": [
+    "The build contains index.html, scene.json, splat-stage.js and vendor/ (stage-init was used rather than hand-rolled plumbing)",
+    "splatsite check on the built site exits 0 with count > 0 and coverage >= 0.2",
+    "The page mounts the scroll-craft engine and at least three acts use a device family other than the camera",
+    "A BRIEF.md exists and is marked as authored rather than interviewed",
+    "No image or video generation API was called"
+   ],
+   "files": []
+  },
+  {
+   "id": 2,
+   "name": "template-route-photo-walk",
+   "prompt": "I walked through our community sports ground filming on my phone and took photos at a few spots along the way. I want a page where visitors walk the ground and see each photo where I took it. The capture is already converted at <scene> — I don't have separate photo files, just use a few frames from the capture as the photos.",
+   "expected_output": "The template route chosen and stated, manifest spots edited with photos, splatsite build run, and a passing check. A bespoke page here would be the wrong call.",
+   "assertions": [
+    "The skill's template route was chosen and the choice was stated in one sentence",
+    "splatsite build produced the site (the album markup is present in index.html)",
+    "The scene manifest has at least two spots, each with at least one photo that exists in the photos directory",
+    "splatsite check on the built site exits 0 with count > 0 and coverage >= 0.2"
+   ],
+   "files": []
+  }
+ ]
+}

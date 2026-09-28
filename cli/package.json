@@ -1,0 +1,12 @@
+{
+  "name": "splatsite",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Video -> Gaussian-splat capture (in Docker) -> interactive photo-walk website.",
+  "bin": { "splatsite": "bin/splatsite.mjs" },
+  "engines": { "node": ">=22" },
+  "scripts": { "test": "node --test" },
+  "dependencies": { "sharp": "^0.34.0", "playwright": "^1.63.0", "@playcanvas/splat-transform": "^3.3.0" },
+  "files": ["bin", "lib", "template", "README.md"],
+  "license": "MIT"
+}

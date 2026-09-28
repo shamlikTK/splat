@@ -1,0 +1,15 @@
+{
+  "name": "splat",
+  "description": "Turn a phone video into a Gaussian-splat capture and a website you walk through.",
+  "owner": { "name": "shamlikt", "url": "https://github.com/shamlikt" },
+  "plugins": [
+    {
+      "name": "splat-site",
+      "source": "./plugins/splat-site",
+      "description": "Reconstruct a 3D Gaussian-splat capture from a phone video in Docker, then build an interactive site around it through the scroll-craft skill.",
+      "version": "0.1.0",
+      "author": { "name": "shamlikt" },
+      "license": "MIT"
+    }
+  ]
+}

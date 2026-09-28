@@ -1,0 +1,9 @@
+{
+  "name": "splat-site",
+  "description": "Turn a phone video into a navigable 3D Gaussian-splat website: reconstruct the capture in Docker with the splatsite CLI, then design the site through the scroll-craft skill.",
+  "version": "0.1.0",
+  "author": { "name": "shamlikt" },
+  "homepage": "https://shamlikt.github.io/splat/",
+  "repository": "https://github.com/shamlikt/splat",
+  "license": "MIT"
+}

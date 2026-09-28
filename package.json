@@ -1,0 +1,9 @@
+{
+  "name": "splat-repo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "build:site": "node site/build.mjs"
+  }
+}
