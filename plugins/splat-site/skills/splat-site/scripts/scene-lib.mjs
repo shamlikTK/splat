@@ -9,9 +9,8 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import os from "node:os";
 import { execFileSync } from "node:child_process";
-import { pathToFileURL } from "node:url";
+import { pathToFileURL, fileURLToPath } from "node:url";
 
 const isCli = (p) => p && fs.existsSync(path.join(p, "lib", "manifest.mjs")) && fs.existsSync(path.join(p, "template", "splat.js"));
 
@@ -22,24 +21,33 @@ export function resolveCli() {
   let hit = take(process.env.SPLATSITE_CLI);
   if (hit) return hit;
 
-  // a `splatsite` on PATH points at bin/splatsite.mjs inside the package
+  // The CLI that ships in this repo, found relative to this file rather than to the working
+  // directory: an installed skill runs from wherever the user happens to be. Marketplace
+  // installs clone the whole repo, not just the plugin's own source subtree, so cli/ (a sibling
+  // of plugins/, per the repository layout) is still on disk at this fixed offset.
+  // <repo>/plugins/splat-site/skills/splat-site/scripts/scene-lib.mjs -> <repo>/cli
+  const here = path.dirname(fileURLToPath(import.meta.url));
+  hit = take(path.resolve(here, "../../../../../cli"));
+  if (hit) return hit;
+
   try {
     const bin = execFileSync("sh", ["-c", "command -v splatsite"], { encoding: "utf8" }).trim();
     if (bin) hit = take(path.dirname(path.dirname(fs.realpathSync(bin))));
     if (hit) return hit;
   } catch { /* not on PATH */ }
 
-  // walk up from the cwd: a checkout of the splatsite repo anywhere above us
   for (let dir = process.cwd(); ; dir = path.dirname(dir)) {
     hit = take(path.join(dir, "splatsite", "cli")) || take(path.join(dir, "cli"));
     if (hit) return hit;
     if (dir === path.dirname(dir)) break;
   }
 
-  hit = take(path.join(os.homedir(), "random", "3dspacial", "splatsite", "cli"));
-  if (hit) return hit;
-
-  throw new Error(`cannot find the splatsite CLI (a folder with lib/manifest.mjs and template/splat.js).\nTried:\n  ${tried.join("\n  ")}\nSet SPLATSITE_CLI=/path/to/splatsite/cli and rerun.`);
+  throw new Error(
+    `cannot find the splatsite CLI (a folder with lib/manifest.mjs and template/splat.js).\n` +
+    `Tried:\n  ${tried.join("\n  ")}\n` +
+    `If you installed this as a plugin, the CLI should sit at <plugin>/cli — reinstall the plugin, ` +
+    `or set SPLATSITE_CLI=/path/to/cli and rerun.`
+  );
 }
 
 export async function loadScene(dir) {

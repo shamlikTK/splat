@@ -49,10 +49,11 @@ phone sizes and with motion reduced, and a plain account of what was not covered
 
 ## What has to be in place
 
-- **The splatsite CLI** (Node 22+). It may be on `PATH`; otherwise run
-  `node <cli>/bin/splatsite.mjs`. The scripts here resolve it from `$SPLATSITE_CLI`, a
-  `splatsite` on `PATH`, a `splatsite/cli` above the cwd, or `~/random/3dspacial/splatsite/cli`.
-  Say which checkout you used.
+- **The splatsite CLI** (Node 22+). It ships inside this plugin at `<plugin>/cli` and the
+  scripts here find it there automatically; it may also be on `PATH`, otherwise run
+  `node <cli>/bin/splatsite.mjs`. The resolution order is `$SPLATSITE_CLI`, the plugin's own
+  `cli/`, a `splatsite` on `PATH`, then a `splatsite/cli` above the cwd. Say which checkout you
+  used.
 - **Docker**, for reconstruction only. A host GPU is detected and used automatically. Without
   one, only `--quality fast` is possible.
 - **The scroll-craft skill — required, not optional.** Every website this skill produces is

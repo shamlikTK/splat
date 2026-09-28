@@ -5,10 +5,10 @@ conversion, and again when one goes wrong.
 
 ## The CLI
 
-`splatsite` is a Node package (Node 22+). It may be on `PATH`; if not, run it as
-`node <cli>/bin/splatsite.mjs …`. Resolve `<cli>` the same way the scripts do:
-`$SPLATSITE_CLI`, then a `splatsite` on `PATH`, then a `splatsite/cli` directory above the cwd,
-then `~/random/3dspacial/splatsite/cli`. Say which one you used, because a user with two
+`splatsite` ships inside this plugin at `<plugin>/cli`, and the scripts here find it there
+automatically. It may also be on `PATH`; otherwise run `node <cli>/bin/splatsite.mjs`. The
+resolution order is `$SPLATSITE_CLI`, the plugin's own `cli/`, a `splatsite` on `PATH`, then a
+`splatsite/cli` above the working directory. Say which one you used, because a user with two
 checkouts will otherwise wonder which image and template they got.
 
 Reconstruction runs in Docker. The image is `ghcr.io/shamlikt/splatsite-recon:latest` by
