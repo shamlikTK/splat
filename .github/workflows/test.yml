@@ -1,0 +1,17 @@
+name: test
+on:
+  push: { branches: [main] }
+  pull_request:
+jobs:
+  node:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - name: repository and site tests
+        run: node --test
+      - name: CLI tests
+        run: cd plugins/splat-site/cli && npm install && npm test
+      - name: skill script tests
+        run: cd plugins/splat-site/skills/splat-site && node --test
