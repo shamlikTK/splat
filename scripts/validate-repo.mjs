@@ -77,7 +77,20 @@ export function validateRepo(root) {
   for (const rel of listFiles(root)) {
     const full = path.join(root, rel);
     if (FORBIDDEN.test(rel)) problems.push(`forbidden file in a public repo: ${rel}`);
-    const { size } = fs.statSync(full);
+    let size;
+    try {
+      ({ size } = fs.statSync(full));
+    } catch (e) {
+      if (e.code === "ENOENT") {
+        // git ls-files reports the index, not the working tree: a plain `rm` (deletion not
+        // staged) leaves the path listed but gone from disk. That disagreement is itself worth
+        // publishing a report about, not silently skipping past.
+        problems.push(`tracked file is missing from disk: ${rel}`);
+      } else {
+        problems.push(`could not read file: ${rel} (${e.message})`);
+      }
+      continue;
+    }
     if (size > MAX_BYTES) problems.push(`file exceeds GitHub's 100 MB limit: ${rel} (${(size / (1024 * 1024)).toFixed(1)} MB)`);
   }
 
