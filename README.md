@@ -7,7 +7,7 @@ through [scroll-craft](https://github.com/nateherkai/scroll-craft).
 ## Install
 
 ```
-/plugin marketplace add shamlikt/splat
+/plugin marketplace add shamlikTK/splat
 /plugin install splat-site@splat
 ```
 
@@ -69,7 +69,7 @@ both MIT.
 ## Documentation
 
 The manual is generated from the skill's own files, so it cannot drift from the skill it
-documents: [shamlikt.github.io/splat/manual/](https://shamlikt.github.io/splat/manual/).
+documents: [shamliktk.github.io/splat/manual/](https://shamliktk.github.io/splat/manual/).
 
 ## Repository layout
 

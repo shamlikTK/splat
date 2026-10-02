@@ -13,7 +13,7 @@ import path from "node:path";
 import { parseArgs, fail } from "./cli-util.mjs";
 import { finishScene } from "./finish.mjs";
 
-export const DEFAULT_IMAGE = process.env.SPLATSITE_IMAGE || "ghcr.io/shamlikt/splatsite-recon:latest";
+export const DEFAULT_IMAGE = process.env.SPLATSITE_IMAGE || "ghcr.io/shamliktk/splatsite-recon:latest";
 
 // Docker gives a container 64 MB of /dev/shm by default, and `high` training cannot run in it:
 // the gsplat trainer's DataLoader hands decoded frames back from its worker processes through

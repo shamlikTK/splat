@@ -131,7 +131,7 @@ export function buildManual({ root, out }) {
 <link rel="stylesheet" href="manual.css">
 </head>
 <body>
-<header class="bar"><a href="../">splat-site</a><a href="https://github.com/shamlikt/splat">GitHub</a></header>
+<header class="bar"><a href="../">splat-site</a><a href="https://github.com/shamlikTK/splat">GitHub</a></header>
 <nav class="toc"><p>Contents</p><ul>${toc}</ul></nav>
 <main>${parts.join("\n")}</main>
 <footer><p>Generated from the skill's own files. Editing the skill updates this page.</p></footer>

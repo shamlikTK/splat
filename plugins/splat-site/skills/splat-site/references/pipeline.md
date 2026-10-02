@@ -11,7 +11,7 @@ resolution order is `$SPLATSITE_CLI`, the plugin's own `cli/`, a `splatsite` on 
 `splatsite/cli` above the working directory. Say which one you used, because a user with two
 checkouts will otherwise wonder which image and template they got.
 
-Reconstruction runs in Docker. The image is `ghcr.io/shamlikt/splatsite-recon:latest` by
+Reconstruction runs in Docker. The image is `ghcr.io/shamliktk/splatsite-recon:latest` by
 default, `splatsite-recon:dev` for a local build, or whatever `SPLATSITE_IMAGE` names. A host
 GPU is detected and used automatically.
 
